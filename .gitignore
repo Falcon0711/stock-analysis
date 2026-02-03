@@ -89,6 +89,7 @@ coverage.xml
 *.tiff
 *.ico
 data/
+!src/stock_analysis/data/
 reports/
 # 保留 .env.example 示例文件，不忽略
 !.env.example
