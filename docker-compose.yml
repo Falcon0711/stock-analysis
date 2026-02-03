@@ -1,0 +1,39 @@
+services:
+  stock-analysis:
+    build: .
+    container_name: stock-analysis
+    env_file:
+      - .env
+    volumes:
+      # 挂载报告输出目录
+      - ./reports:/app/reports
+      # 挂载日志目录
+      - ./logs:/app/logs
+    # 默认分析贵州茅台
+    command: [ "600519" ]
+
+  # AI 增强分析服务
+  stock-analysis-ai:
+    build: .
+    container_name: stock-analysis-ai
+    env_file:
+      - .env
+    volumes:
+      - ./reports:/app/reports
+      - ./logs:/app/logs
+    command: [ "600519", "--ai" ]
+    profiles:
+      - ai
+
+  # 批量分析服务
+  stock-analysis-batch:
+    build: .
+    container_name: stock-analysis-batch
+    env_file:
+      - .env
+    volumes:
+      - ./reports:/app/reports
+      - ./logs:/app/logs
+    command: [ "--list" ]
+    profiles:
+      - batch

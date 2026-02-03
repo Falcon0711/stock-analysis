@@ -16,11 +16,50 @@
 
 ## 🚀 快速开始
 
-### 最简单的使用方式
+### 方式一：Docker（推荐）
+
+最简单的使用方式，无需安装 Python 环境：
 
 ```bash
 # 克隆项目
-git clone https://github.com/yourusername/stock-analysis.git
+git clone https://github.com/Falcon0711/stock-analysis.git
+cd stock-analysis
+
+# 复制配置文件并填入 API Key
+cp .env.example .env
+nano .env  # 编辑配置
+
+# 运行分析
+docker compose run --rm stock-analysis 600519
+
+# AI 增强分析
+docker compose run --rm stock-analysis 600519 --ai
+
+# 批量分析（使用 .env 中的 STOCK_LIST）
+docker compose run --rm stock-analysis --list
+```
+
+#### Docker 命令说明
+
+```bash
+# 构建镜像
+docker compose build
+
+# 分析指定股票
+docker compose run --rm stock-analysis 600519 000001 300750
+
+# AI 分析并输出到文件
+docker compose run --rm stock-analysis 600519 --ai -o /app/reports/report.txt
+
+# 查看帮助
+docker compose run --rm stock-analysis --help
+```
+
+### 方式二：本地安装
+
+```bash
+# 克隆项目
+git clone https://github.com/Falcon0711/stock-analysis.git
 cd stock-analysis
 
 # 安装依赖
@@ -115,9 +154,12 @@ python run_analysis.py --help
 
 ```
 stock_analysis/
+├── Dockerfile              # Docker 镜像配置
+├── docker-compose.yml      # Docker Compose 配置
 ├── pyproject.toml          # 项目配置和依赖
 ├── README.md               # 项目说明
 ├── run_analysis.py         # 快速分析脚本 ⭐
+├── .env.example            # 配置示例
 ├── src/
 │   └── stock_analysis/     # 主包
 │       ├── __init__.py
@@ -127,17 +169,14 @@ stock_analysis/
 │       ├── config/         # 配置模块
 │       ├── core/           # 核心分析
 │       │   ├── analyzer.py             # AI 分析器
-│       │   ├── technical_indicators.py # 技术指标
-│       │   └── pipeline.py             # 分析流水线
+│       │   └── technical_indicators.py # 技术指标
 │       ├── data_sources/   # 数据源
 │       │   └── tencent.py  # 腾讯数据源
-│       ├── notification/   # 通知服务
 │       ├── skills/         # 分析技能 ⭐
 │       │   ├── stock_analysis.py
 │       │   └── SKILL.md    # 技能说明
 │       └── utils/          # 工具函数
 ├── tests/                  # 测试
-├── scripts/                # 脚本
 └── docs/                   # 文档
 ```
 

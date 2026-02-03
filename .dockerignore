@@ -1,0 +1,44 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv
+env/
+venv/
+ENV/
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# 测试
+.pytest_cache
+.coverage
+htmlcov/
+tests/
+
+# 文档（镜像中不需要）
+docs/
+*.md
+!README.md
+
+# 环境配置（通过 env_file 挂载）
+.env
+.env.*
+!.env.example
+
+# 其他
+.DS_Store
+*.log
+logs/
+reports/
+data/
+.gemini/
