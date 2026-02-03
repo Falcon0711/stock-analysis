@@ -1,6 +1,6 @@
 # A股智能分析系统 (Stock Analysis)
 
-[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://python.org)
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 一个专业的 A 股智能分析系统，集成技术指标计算与多 AI 模型分析能力。
@@ -8,10 +8,10 @@
 ## ✨ 特性
 
 - 📊 **全面的技术指标** - KDJ、MACD、RSI、BBI、布林带、知行指标等
-- 🤖 **多 AI 模型支持** - Gemini、OpenAI、DeepSeek
+- 🤖 **多 AI 模型支持** - DeepSeek、OpenAI、Gemini
 - 📈 **实时数据获取** - 腾讯财经数据源
-- 🔔 **多渠道通知** - 飞书、Telegram、钉钉（开发中）
-- ⏰ **定时任务** - 支持每日定时分析
+- 🔍 **智能股票搜索** - 支持名称模糊匹配，内置 5500+ A股映射
+- 🐳 **Docker 支持** - 一键部署运行
 - 🎯 **交易策略融入** - 乖离率控制、多头排列检测
 
 ## 🚀 快速开始
@@ -158,6 +158,7 @@ stock_analysis/
 ├── docker-compose.yml      # Docker Compose 配置
 ├── pyproject.toml          # 项目配置和依赖
 ├── README.md               # 项目说明
+├── LICENSE                 # MIT 许可证
 ├── run_analysis.py         # 快速分析脚本 ⭐
 ├── .env.example            # 配置示例
 ├── src/
@@ -170,11 +171,12 @@ stock_analysis/
 │       ├── core/           # 核心分析
 │       │   ├── analyzer.py             # AI 分析器
 │       │   └── technical_indicators.py # 技术指标
+│       ├── data/           # 数据模块 ⭐
+│       │   └── stock_codes.json        # 5500+ A股映射
 │       ├── data_sources/   # 数据源
 │       │   └── tencent.py  # 腾讯数据源
-│       ├── skills/         # 分析技能 ⭐
-│       │   ├── stock_analysis.py
-│       │   └── SKILL.md    # 技能说明
+│       ├── skills/         # 分析技能
+│       │   └── stock_analysis.py
 │       └── utils/          # 工具函数
 ├── tests/                  # 测试
 └── docs/                   # 文档
