@@ -31,11 +31,11 @@ except ImportError:
     logger.debug("OpenAI SDK 未安装，将无法使用 OpenAI 兼容 API")
 
 try:
-    import google.generativeai as genai
+    from google import genai
     GENAI_AVAILABLE = True
 except ImportError:
     GENAI_AVAILABLE = False
-    logger.debug("Google Generative AI SDK 未安装，将无法使用 Gemini API")
+    logger.debug("Google GenAI SDK 未安装，将无法使用 Gemini API")
 
 
 # ============ 数据类 ============
@@ -133,7 +133,7 @@ class BaseAIAnalyzer(ABC):
 # ============ Gemini 分析器 ============
 
 class GeminiAnalyzer(BaseAIAnalyzer):
-    """Gemini 分析器"""
+    """Gemini 分析器（使用新的 google.genai SDK）"""
     
     def __init__(self, api_key: str, model: str = "gemini-2.5-flash"):
         self.api_key = api_key
@@ -142,8 +142,7 @@ class GeminiAnalyzer(BaseAIAnalyzer):
         
         if GENAI_AVAILABLE and api_key:
             try:
-                genai.configure(api_key=api_key)
-                self.client = genai.GenerativeModel(model_name=model)
+                self.client = genai.Client(api_key=api_key)
                 logger.info(f"Gemini 分析器初始化成功，模型: {model}")
             except Exception as e:
                 logger.error(f"Gemini 分析器初始化失败: {e}")
@@ -160,7 +159,10 @@ class GeminiAnalyzer(BaseAIAnalyzer):
 
         try:
             prompt = self._build_prompt(stock_result)
-            response = self.client.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=prompt
+            )
             
             if response and response.text:
                 # 更新分析结果
