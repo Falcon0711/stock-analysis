@@ -72,16 +72,38 @@ def main() -> int:
     config = get_config()
     
     # 确定要分析的股票列表
+    raw_inputs = []
     if args.use_config_list:
-        stock_codes = config.stock_list
-        if not stock_codes:
+        raw_inputs = config.stock_list
+        if not raw_inputs:
             logger.error("配置中没有股票列表，请设置 STOCK_LIST 环境变量")
             return 1
     elif args.stocks:
-        stock_codes = args.stocks
+        raw_inputs = args.stocks
     else:
-        stock_codes = ["600519"]  # 默认：贵州茅台
+        raw_inputs = ["600519"]  # 默认：贵州茅台
         logger.info("未指定股票代码，使用默认: 600519 (贵州茅台)")
+    
+    # 解析股票代码（支持中文名称）
+    from stock_analysis.data import get_stock_code
+    stock_codes = []
+    
+    for item in raw_inputs:
+        # 如果是 6 位数字，直接使用
+        if item.isdigit() and len(item) == 6:
+            stock_codes.append(item)
+        else:
+            # 尝试通过名称查找
+            code = get_stock_code(item)
+            if code:
+                logger.info(f"解析股票名称: '{item}' -> {code}")
+                stock_codes.append(code)
+            else:
+                logger.warning(f"无法识别股票: '{item}'，已跳过")
+    
+    if not stock_codes:
+        logger.error("没有有效的股票代码，请检查输入")
+        return 1
     
     # 导入分析技能
     from stock_analysis.skills import StockAnalysisSkill

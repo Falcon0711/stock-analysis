@@ -51,12 +51,19 @@ for name, code in search_stocks('{关键词}')[:5]:
 
 ## 执行流程
 
+项目中已集成智能名称解析，你可以直接使用 **股票名称** 或 **股票代码**。
+
 ### 方式 1：快速分析（推荐）
 
 // turbo
 ```bash
-cd /Users/ffmeng/Documents/stock_analysis_project && python3 run_analysis.py {股票代码}
+cd /Users/ffmeng/Documents/stock_analysis_project && python3 run_analysis.py {股票代码或名称}
 ```
+
+**示例**：
+- `python3 run_analysis.py 600519`
+- `python3 run_analysis.py 茅台`
+- `python3 run_analysis.py 宁德时代`
 
 ### 方式 2：AI 增强分析
 
@@ -64,15 +71,20 @@ cd /Users/ffmeng/Documents/stock_analysis_project && python3 run_analysis.py {�
 
 // turbo
 ```bash
-cd /Users/ffmeng/Documents/stock_analysis_project && python3 run_analysis.py {股票代码} --ai
+cd /Users/ffmeng/Documents/stock_analysis_project && python3 run_analysis.py {股票代码或名称} --ai
 ```
 
 ### 方式 3：批量分析
 
+支持同时分析多只股票（混合代码和名称）：
+
 // turbo
 ```bash
-cd /Users/ffmeng/Documents/stock_analysis_project && python3 run_analysis.py {代码1} {代码2} {代码3}
+cd /Users/ffmeng/Documents/stock_analysis_project && python3 run_analysis.py {股票1} {股票2} {股票3}
 ```
+
+**示例**：
+- `python3 run_analysis.py 茅台 000001 宁德`
 
 ### 方式 4：使用 Python API
 
