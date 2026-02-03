@@ -55,21 +55,44 @@ docker compose run --rm stock-analysis 600519 --ai -o /app/reports/report.txt
 docker compose run --rm stock-analysis --help
 ```
 
-### 方式二：本地安装
+### 方式二：本地 Python 运行
 
 ```bash
-# 克隆项目
+# 1. 克隆代码
 git clone https://github.com/Falcon0711/stock-analysis.git
 cd stock-analysis
 
-# 安装依赖
+# 2. 安装依赖（推荐使用虚拟环境）
 pip install -e .
 
-# 分析股票
-python run_analysis.py 600519
+# 3. 配置环境变量
+cp .env.example .env
+# 编辑 .env 文件，填入 API Key
 ```
 
-### 完整安装
+## 🔄 如何更新
+
+如果你已经部署了旧版本，请按以下步骤更新：
+
+### Git 源码部署
+```bash
+# 1. 拉取最新代码
+git pull origin main
+
+# 2. 更新依赖（重要！有新依赖变更）
+pip install -e .
+```
+
+### Docker 部署
+```bash
+# 1. 拉取最新代码
+git pull origin main
+
+# 2. 重新构建镜像
+docker compose up -d --build
+```
+
+## 🛠️ 使用指南完整安装
 
 ```bash
 # 创建虚拟环境
