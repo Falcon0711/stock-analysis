@@ -30,23 +30,12 @@
 - [x] 配置模块测试
 - [x] 51 个测试通过
 
-### 阶段五：技能整合 ✅ (2026-02-03 新增)
+### 阶段五：技能整合与清理 ✅
 
-- [x] 整合 `agents/skills/` 到 `src/stock_analysis/skills/`
-- [x] 整合 `skills/` 目录
+- [x] 整合所有 skills 到 `src/stock_analysis/skills/`
 - [x] 创建 `run_analysis.py` 快速分析脚本
-- [x] 添加 AI 增强分析功能
-- [x] 更新技能文档 `SKILL.md`
-
-### 阶段六：清理 ✅ (2026-02-03 新增)
-
-- [x] 删除 `agents/skills/` 目录
-- [x] 删除 `skills/` 目录
-- [x] 删除 `models/core/` 目录
-- [x] 删除 `sources/` 目录
-- [x] 删除 `config/config/` 目录
-- [x] 删除 `utils/` 目录
-- [x] 清理 Python 缓存
+- [x] 删除所有冗余旧目录和文件
+- [x] 清理过时文档
 
 ---
 
@@ -54,33 +43,30 @@
 
 ```
 stock_analysis_project/
-├── pyproject.toml          # 项目配置和依赖
-├── README.md               # 项目说明
-├── run_analysis.py         # 快速分析脚本 ⭐
-├── src/
-│   └── stock_analysis/     # 主包
-│       ├── __init__.py
-│       ├── __main__.py
-│       ├── main.py
-│       ├── constants.py
-│       ├── config/
-│       ├── core/
-│       │   ├── analyzer.py
-│       │   ├── technical_indicators.py
-│       │   └── pipeline.py
-│       ├── data_sources/
-│       │   └── tencent.py
-│       ├── notification/
-│       ├── skills/
-│       │   ├── stock_analysis.py
-│       │   └── SKILL.md
-│       └── utils/
-│           └── stock_code.py
-├── tests/                  # 51 个测试
-├── scripts/                # 脚本
-├── docs/                   # 文档
-├── data/                   # 数据目录
-└── reports/                # 报告目录
+├── pyproject.toml              # 项目配置和依赖
+├── README.md                   # 项目说明
+├── run_analysis.py             # 快速分析脚本 ⭐
+├── docs/
+│   └── REPORT_TEMPLATE.md      # 报告模板说明
+├── src/stock_analysis/         # 主包
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── main.py                 # 完整主程序
+│   ├── constants.py
+│   ├── config/__init__.py
+│   ├── core/
+│   │   ├── analyzer.py
+│   │   ├── pipeline.py
+│   │   └── technical_indicators.py
+│   ├── data_sources/
+│   │   └── tencent.py
+│   ├── notification/__init__.py
+│   ├── skills/
+│   │   ├── stock_analysis.py
+│   │   └── SKILL.md
+│   └── utils/
+│       └── stock_code.py
+└── tests/                      # 51 个测试
 ```
 
 ---
@@ -88,14 +74,12 @@ stock_analysis_project/
 ## 使用方式
 
 ```bash
-# 分析单只股票
+# 快速分析（推荐）
 python run_analysis.py 600519
-
-# 包含 AI 分析
 python run_analysis.py 600519 --ai
 
-# 批量分析
-python run_analysis.py 600519 000001 300750
+# 完整功能
+python -m stock_analysis --stocks 600519,000001
 
 # 运行测试
 python -m pytest tests/ -v
@@ -103,31 +87,5 @@ python -m pytest tests/ -v
 
 ---
 
-## 文件清单
-
-| 文件路径 | 描述 |
-|---------|------|
-| `pyproject.toml` | 项目配置和依赖管理 |
-| `README.md` | 项目说明文档 |
-| `run_analysis.py` | 快速分析脚本 |
-| `src/stock_analysis/__init__.py` | 包初始化 |
-| `src/stock_analysis/__main__.py` | 包入口 |
-| `src/stock_analysis/main.py` | 主程序 |
-| `src/stock_analysis/constants.py` | 常量定义 |
-| `src/stock_analysis/config/__init__.py` | 配置模块 |
-| `src/stock_analysis/core/analyzer.py` | AI 分析器 |
-| `src/stock_analysis/core/technical_indicators.py` | 技术指标 |
-| `src/stock_analysis/core/pipeline.py` | 分析流水线 |
-| `src/stock_analysis/data_sources/tencent.py` | 腾讯数据源 |
-| `src/stock_analysis/notification/__init__.py` | 通知服务 |
-| `src/stock_analysis/skills/stock_analysis.py` | 股票分析技能 |
-| `src/stock_analysis/skills/SKILL.md` | 技能说明文档 |
-| `src/stock_analysis/utils/stock_code.py` | 股票代码工具 |
-| `tests/test_*.py` | 单元测试 |
-| `scripts/migration_guide.py` | 迁移指南脚本 |
-
----
-
 创建时间: 2026-02-03
-状态: ✅ 全部完成
-更新时间: 2026-02-03 20:10
+更新时间: 2026-02-03 20:26
