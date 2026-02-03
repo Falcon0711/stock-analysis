@@ -3,9 +3,8 @@
 股票分析技能模块
 提供标准化的个股技术分析报告，支持基础分析和 AI 增强分析
 """
-import os
 import logging
-from typing import Dict, Optional, Any
+from typing import Dict, Any, Optional
 
 import pandas as pd
 
@@ -28,21 +27,13 @@ class StockAnalysisSkill:
     def __init__(self):
         self.data_source = TencentDataSource()
     
-    def analyze_stock(self, stock_code: str) -> str:
-        """
-        分析单个股票并返回标准化技术分析报告
-        
-        Args:
-            stock_code: 股票代码
-            
-        Returns:
-            格式化的分析报告字符串
-        """
+    def _fetch_data_and_calculate(self, stock_code: str):
+        """获取数据并计算技术指标"""
         # 获取 120 天历史 K 线数据
         kline_data = self.data_source.get_kline_data(stock_code, days=120)
         
         if not kline_data:
-            return f"❌ 未能获取到 {stock_code} 的历史数据"
+            return None, None, f"❌ 未能获取到 {stock_code} 的历史数据"
         
         # 转换为 DataFrame
         df = pd.DataFrame(kline_data)
@@ -58,17 +49,27 @@ class StockAnalysisSkill:
         result_df = calculate_all_indicators(df)
         
         if result_df is None:
-            return f"❌ {stock_code} 技术指标计算失败"
+            return None, None, f"❌ {stock_code} 技术指标计算失败"
         
         latest = result_df.iloc[-1]
         
         # 获取实时数据
         realtime_data = self.data_source.get_realtime([stock_code])
         if stock_code not in realtime_data:
-            return f"❌ 未能获取到 {stock_code} 的实时数据"
+            return None, None, f"❌ 未能获取到 {stock_code} 的实时数据"
         
         current_data = realtime_data[stock_code]
         
+        return current_data, latest, None
+
+    def analyze_stock(self, stock_code: str) -> str:
+        """
+        分析单个股票并返回标准化技术分析报告
+        """
+        current_data, latest, error = self._fetch_data_and_calculate(stock_code)
+        if error:
+            return error
+            
         # 确定支撑阻力
         change_pct = current_data["change_pct"]
         support, resistance = self._get_support_resistance(change_pct, latest, current_data)
@@ -79,33 +80,18 @@ class StockAnalysisSkill:
     def analyze_stock_with_ai(self, stock_code: str) -> str:
         """
         分析单个股票并返回包含 AI 综合分析的报告
-        
-        Args:
-            stock_code: 股票代码
-            
-        Returns:
-            格式化的分析报告字符串（包含 AI 分析）
         """
-        # 首先获取标准技术分析
-        standard_report = self.analyze_stock(stock_code)
+        # 1. 获取基础数据和分析结果
+        current_data, latest, error = self._fetch_data_and_calculate(stock_code)
+        if error:
+            return error
+            
+        # 2. 生成基础报告
+        change_pct = current_data["change_pct"]
+        support, resistance = self._get_support_resistance(change_pct, latest, current_data)
+        standard_report = self._build_report(stock_code, current_data, latest, support, resistance)
         
-        # 准备 AI 分析
-        ai_analysis = self._get_ai_analysis(stock_code)
-        
-        # 将 AI 分析部分添加到标准报告末尾
-        if ai_analysis:
-            lines = standard_report.split("\n")
-            if len(lines) > 2:
-                # 在倒数第二行前插入 AI 分析
-                final_lines = lines[:-2]
-                final_lines.append(ai_analysis)
-                final_lines.extend(lines[-2:])
-                return "\n".join(final_lines)
-        
-        return standard_report + "\n" + ai_analysis
-    
-    def _get_ai_analysis(self, stock_code: str) -> str:
-        """获取 AI 分析结果"""
+        # 3. 准备 AI 分析所需的数据，直接使用已获取的数据
         try:
             from stock_analysis.core.analyzer import CombinedAnalyzer, StockResult
             from stock_analysis.config import get_global_config
@@ -118,23 +104,64 @@ class StockAnalysisSkill:
                      config.ai.gemini_api_key)
             
             if not has_ai:
-                return "\n🤖 AI综合分析: 未配置AI API密钥，请设置 DEEPSEEK_API_KEY、OPENAI_API_KEY 或 GEMINI_API_KEY"
-            
-            # 获取数据并进行 AI 分析
-            analyzer = CombinedAnalyzer(config)
-            result = analyzer.analyze_single_stock(stock_code)
-            
-            if result and result.operation_advice:
-                return f"\n\n🤖 AI综合分析:\n{result.operation_advice}"
+                ai_analysis = "\n🤖 AI综合分析: 未配置AI API密钥，请设置 DEEPSEEK_API_KEY、OPENAI_API_KEY 或 GEMINI_API_KEY"
             else:
-                return "\n\n🤖 AI综合分析: AI 分析未返回结果"
+                # 构造传递给 AI 的数据对象
+                technical_indicators = {
+                    "volume": current_data.get("volume", 0),
+                    "amount": current_data.get("amount", 0),
+                    "open": current_data.get("open", 0.0),
+                    "high": current_data.get("high", 0.0),
+                    "low": current_data.get("low", 0.0),
+                    # 添加关键技术指标
+                    "KDJ_K": latest.get('kdj_k'),
+                    "KDJ_D": latest.get('kdj_d'),
+                    "KDJ_J": latest.get('kdj_j'),
+                    "MACD": latest.get('macd'),
+                    "MACD_Signal": latest.get('macd_signal'),
+                    "MACD_Hist": latest.get('macd_hist'),
+                    "RSI": latest.get('rsi_14'),
+                    "BBI": latest.get('bbi'),
+                    "MA5": latest.get('ma5'),
+                    "MA10": latest.get('ma10'),
+                    "MA20": latest.get('ma20'),
+                    "MA60": latest.get('ma60'),
+                }
                 
-        except ImportError as e:
-            logger.warning(f"无法导入 AI 分析器: {e}")
-            return f"\n\n🤖 AI综合分析: 无法导入分析器 ({e})"
+                # 预先计算情感得分
+                sentiment_score, operation_advice = CombinedAnalyzer._calculate_basic_sentiment(change_pct)
+                
+                stock_result = StockResult(
+                    code=stock_code,
+                    name=current_data.get("name", ""),
+                    current_price=current_data.get("now", 0.0),
+                    change_percent=change_pct,
+                    sentiment_score=sentiment_score,
+                    operation_advice=operation_advice,
+                    trend_prediction=f"当前涨跌幅{change_pct:+.2f}%",
+                    technical_indicators=technical_indicators,
+                )
+                
+                # 初始化分析器并进行 AI 分析
+                analyzer = CombinedAnalyzer(config)
+                result = analyzer.analyze_stock(stock_result)
+                
+                if result and result.operation_advice:
+                    # 检查是否只返回了默认建议（即 AI 分析失败）
+                    if result.operation_advice.startswith("AI分析:"):
+                        ai_analysis = f"\n\n🤖 AI综合分析:\n{result.operation_advice}"
+                    else:
+                        # 如果没有 AI 前缀，可能是分析失败回退到了基础建议
+                        ai_analysis = f"\n\n🤖 AI综合分析: (AI服务响应异常，显示基础建议)\n{result.operation_advice}"
+                else:
+                    ai_analysis = "\n\n🤖 AI综合分析: AI 分析未返回结果"
+
         except Exception as e:
-            logger.error(f"AI 分析失败: {e}")
-            return f"\n\n🤖 AI综合分析: 分析过程出错 ({e})"
+            logger.error(f"AI 分析过程出错: {e}")
+            ai_analysis = f"\n\n🤖 AI综合分析: 分析过程出错 ({e})"
+        
+        # 4. 组合报告
+        return standard_report + "\n" + ai_analysis
     
     def _get_support_resistance(
         self,
