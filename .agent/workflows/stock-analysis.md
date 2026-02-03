@@ -4,194 +4,168 @@ description: 分析 A 股股票，获取技术指标和 AI 投资建议
 
 # 股票分析技能
 
-## 何时使用此技能
+## 触发条件
 
-当用户的请求涉及以下内容时，**必须**使用此技能：
+当用户请求涉及以下内容时，**自动触发**此技能：
 
-- 🔹 分析任何 A 股股票（如："帮我分析一下茅台"、"600519 怎么样"）
-- 🔹 查询股票实时价格、涨跌幅
-- 🔹 获取技术指标（KDJ、MACD、BBI、均线等）
-- 🔹 需要买卖建议或操作提示
-- 🔹 批量分析多只股票
+| 触发类型 | 示例 |
+|----------|------|
+| 股票名称 | "分析茅台"、"看看宁德时代" |
+| 股票代码 | "600519 怎么样"、"分析 000001" |
+| 投资建议 | "茅台能买吗"、"比亚迪现在什么价" |
+| 批量分析 | "分析一下茅台、平安、宁德" |
+| 技术指标 | "茅台的 KDJ 是多少"、"MACD 金叉了吗" |
 
-## 常见股票代码
+## 股票名称解析
 
-| 股票名称 | 代码 | 说明 |
-|----------|------|------|
-| 贵州茅台 / 茅台 | 600519 | 白酒龙头 |
-| 中国黄金 | 600916 | 黄金珠宝 |
-| 平安银行 | 000001 | 银行股 |
-| 宁德时代 | 300750 | 新能源龙头 |
-| 比亚迪 | 002594 | 新能源车 |
-| 招商银行 | 600036 | 银行股 |
-| 中国平安 | 601318 | 保险龙头 |
-| 腾讯控股 | 00700 | 港股科技 |
-| 五粮液 | 000858 | 白酒 |
-| 中信证券 | 600030 | 券商龙头 |
-| 隆基绿能 | 601012 | 光伏龙头 |
-| 紫金矿业 | 601899 | 黄金矿业 |
-| 合力科技 | 603917 | 汽配 |
+项目内置 **5500+ A股** 名称到代码的映射。可以使用以下方式查询：
 
-## 执行步骤
+// turbo
+```bash
+cd /Users/ffmeng/Documents/stock_analysis_project && python3 -c "
+import sys; sys.path.insert(0, 'src')
+from stock_analysis.data import get_stock_code, search_stocks
 
-### 步骤 1：基础技术分析
+# 精确查询
+print(get_stock_code('{股票名称}'))
+
+# 模糊搜索
+for name, code in search_stocks('{关键词}')[:5]:
+    print(f'{name}: {code}')
+"
+```
+
+## 执行流程
+
+### 方式 1：快速分析（推荐）
 
 // turbo
 ```bash
 cd /Users/ffmeng/Documents/stock_analysis_project && python3 run_analysis.py {股票代码}
 ```
 
-**示例**：
-```bash
-cd /Users/ffmeng/Documents/stock_analysis_project && python3 run_analysis.py 600519
-```
+### 方式 2：AI 增强分析
 
-### 步骤 2：AI 增强分析（可选）
-
-如果用户需要更详细的投资建议，使用 `--ai` 参数：
+当用户明确要求"投资建议"、"操作建议"、"能不能买"时使用：
 
 // turbo
 ```bash
 cd /Users/ffmeng/Documents/stock_analysis_project && python3 run_analysis.py {股票代码} --ai
 ```
 
-**示例**：
-```bash
-cd /Users/ffmeng/Documents/stock_analysis_project && python3 run_analysis.py 600519 --ai
-```
-
-### 步骤 3：批量分析（可选）
-
-分析多只股票时，直接列出所有代码：
+### 方式 3：批量分析
 
 // turbo
 ```bash
 cd /Users/ffmeng/Documents/stock_analysis_project && python3 run_analysis.py {代码1} {代码2} {代码3}
 ```
 
-**示例**：
-```bash
-cd /Users/ffmeng/Documents/stock_analysis_project && python3 run_analysis.py 600519 000001 300750
-```
-
-### 步骤 4：使用配置的股票列表
-
-// turbo
-```bash
-cd /Users/ffmeng/Documents/stock_analysis_project && python3 run_analysis.py --list
-```
-
-### 步骤 5：输出到文件
-
-// turbo
-```bash
-cd /Users/ffmeng/Documents/stock_analysis_project && python3 run_analysis.py {股票代码} --ai -o report.txt
-```
-
-## Python API 调用
+### 方式 4：使用 Python API
 
 ```python
 import sys
 sys.path.insert(0, "/Users/ffmeng/Documents/stock_analysis_project/src")
 
-from stock_analysis.skills import (
-    get_stock_analysis,
-    get_stock_analysis_with_ai,
-    get_multiple_stock_analysis,
-)
+from stock_analysis.skills import get_stock_analysis, get_stock_analysis_with_ai
+from stock_analysis.data import get_stock_code
 
-# 基础技术分析
-report = get_stock_analysis("600519")
+# 名称转代码
+code = get_stock_code("茅台")  # -> "600519"
+
+# 分析
+report = get_stock_analysis(code)
 print(report)
-
-# AI 增强分析
-report = get_stock_analysis_with_ai("600519")
-print(report)
-
-# 批量分析
-reports = get_multiple_stock_analysis(["600519", "000001", "300750"])
-for code, report in reports.items():
-    print(report)
 ```
 
-## 输出格式说明
+## 常用股票速查
 
-### 基础分析报告包含：
+| 简称 | 全称 | 代码 | 行业 |
+|------|------|------|------|
+| 茅台 | 贵州茅台 | 600519 | 白酒 |
+| 平安 | 中国平安 | 601318 | 保险 |
+| 宁德 | 宁德时代 | 300750 | 新能源 |
+| 比亚迪 | 比亚迪 | 002594 | 汽车 |
+| 招行 | 招商银行 | 600036 | 银行 |
+| 中信 | 中信证券 | 600030 | 券商 |
+| 黄金 | 中国黄金 | 600916 | 黄金 |
+| 紫金 | 紫金矿业 | 601899 | 矿业 |
+| 隆基 | 隆基绿能 | 601012 | 光伏 |
+
+## 输出格式
 
 ```
-📈 基本信息: 股票名称 | 代码
-💰 当前价格: xxx元 | 涨跌: +/-xx | 涨幅: +/-x.xx%
+=================================================================
+              {股票名称}({代码}) 技术分析报告
+=================================================================
+📈 基本信息: {名称} | {代码}
+💰 当前价格: {价格}元 | 涨跌: {涨跌} | 涨幅: {涨跌幅}%
 
 📊 技术指标概览:
-  KDJ: K=xx, D=xx, J=xx | 信号: 🟢金叉/🔴死叉
-  MACD: DIF, DEA, HIST | 信号: 🟢多头/🔴空头
-  BBI: xx | 位置: 上方/下方
-  MA5/10/20/60: xx/xx/xx/xx
-  知行指标: 趋势线=xx | 位置: 上方/下方
+  KDJ: K={K}, D={D}, J={J} | 信号: 🟢金叉/🔴死叉
+  MACD: {DIF}, {DEA}, {HIST} | 信号: 🟢多头/🔴空头
+  BBI: {BBI} | 位置: 上方/下方
+  MA5/10/20/60: {MA5}/{MA10}/{MA20}/{MA60}
+  知行指标: 趋势线={趋势} | 多空线={多空}
 
 🛡️ 支撑阻力:
-  近期支撑: MAx=xx | 近期阻力: MAx=xx
+  近期支撑: {支撑位} | 近期阻力: {阻力位}
 
 🎯 综合信号:
   买卖建议: 🟢买入/🔴卖出/🟡观望
   风险等级: 🔴高/🟡中/🟢低
 
-💡 提示: 操作建议
+💡 提示: {操作建议}
+=================================================================
+
+🤖 AI综合分析:（--ai 参数时显示）
+{AI 分析内容}
 ```
 
-### AI 增强分析额外包含：
+## 信号解读
 
-```
-🤖 AI综合分析:
-  - 技术面分析
-  - 短期趋势预测
-  - 操作建议
-  - 风险提示
-```
+| 指标 | 🟢 买入信号 | 🔴 卖出信号 |
+|------|------------|------------|
+| KDJ | K 上穿 D（金叉）| K 下穿 D（死叉）|
+| MACD | DIF > DEA（多头）| DIF < DEA（空头）|
+| BBI | 价格 > BBI | 价格 < BBI |
+| 均线 | MA5 > MA10 > MA20 | MA5 < MA10 < MA20 |
 
-## 用户请求示例
+## 用户请求处理
 
-| 用户说 | 执行命令 |
-|--------|----------|
-| "分析茅台" | `python3 run_analysis.py 600519` |
-| "帮我分析一下贵州茅台" | `python3 run_analysis.py 600519` |
-| "给我 600519 的 AI 分析" | `python3 run_analysis.py 600519 --ai` |
-| "我想了解 600519 的投资建议" | `python3 run_analysis.py 600519 --ai` |
-| "帮我看看茅台、平安、宁德" | `python3 run_analysis.py 600519 000001 300750` |
-| "茅台现在能买吗" | `python3 run_analysis.py 600519 --ai` |
+| 用户说 | 理解为 | 执行 |
+|--------|--------|------|
+| "分析茅台" | 茅台 = 600519 | `run_analysis.py 600519` |
+| "600519" | 直接使用代码 | `run_analysis.py 600519` |
+| "茅台能买吗" | 需要 AI 建议 | `run_analysis.py 600519 --ai` |
+| "看看银行股" | 搜索"银行" | 先 `search_stocks("银行")` |
+| "分析黄金股" | 搜索"黄金" | 先查询再分析 |
 
-## 配置说明
+## 配置
 
-配置文件位置：`/Users/ffmeng/Documents/stock_analysis_project/.env`
+配置文件：`/Users/ffmeng/Documents/stock_analysis_project/.env`
 
-```bash
-# DeepSeek API（已配置）
-DEEPSEEK_API_KEY=sk-xxxxx
+```ini
+# AI API（三选一）
+DEEPSEEK_API_KEY=sk-xxx    # 推荐，性价比高
+OPENAI_API_KEY=sk-xxx      # 可选
+GEMINI_API_KEY=xxx         # 可选
 
 # 默认股票列表
 STOCK_LIST=600519,000001,300750
 ```
 
-## 技术指标解读
-
-| 指标 | 买入信号 | 卖出信号 |
-|------|----------|----------|
-| KDJ | K 上穿 D（🟢金叉）| K 下穿 D（🔴死叉）|
-| MACD | DIF 上穿 DEA（🟢多头）| DIF 下穿 DEA（🔴空头）|
-| BBI | 价格站上 BBI | 价格跌破 BBI |
-| 均线 | 多头排列 (MA5>MA10>MA20) | 空头排列 |
-
 ## 故障排除
 
 | 问题 | 解决方案 |
 |------|----------|
-| `ModuleNotFoundError` | 运行 `pip install -e .` 安装依赖 |
-| AI 分析无输出 | 检查 `.env` 中的 API Key 配置 |
-| 网络超时 | 检查网络连接，腾讯数据源需联网 |
+| 股票名找不到 | 使用 `search_stocks("关键词")` 搜索 |
+| AI 分析无输出 | 检查 `.env` 中的 API Key |
+| 网络超时 | 检查网络，腾讯数据源需联网 |
+| ModuleNotFoundError | 运行 `pip install -e .` |
 
-## 重要提醒
+## 免责声明
 
-⚠️ **免责声明**
-- 本工具生成的分析报告仅供参考，不构成任何投资建议
+⚠️ **重要提醒**
+- 本工具仅供学习和参考，不构成投资建议
 - 股市有风险，投资需谨慎
-- AI 分析结果可能存在偏差，请结合多方信息综合判断
+- AI 分析可能存在偏差，请综合判断
